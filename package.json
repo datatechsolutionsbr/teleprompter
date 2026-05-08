@@ -1,6 +1,6 @@
 {
   "name": "@datatechsolutions/teleprompter",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Drop-in React teleprompter — auto-scroll, mirror, section labels, keyboard control. Extracted from the Astrlabe / Datatech pitch deck.",
   "license": "MIT",
   "author": "Datatech Solutions",

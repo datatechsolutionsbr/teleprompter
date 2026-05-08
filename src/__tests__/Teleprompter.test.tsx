@@ -117,6 +117,37 @@ describe('<Teleprompter />', () => {
     expect(screen.getByRole('button', { name: 'my-accessory' })).toBeInTheDocument()
   })
 
+  it('applies fontColor to body lines', () => {
+    const { container } = render(
+      <Teleprompter initialScript={SCRIPT} storageKey={null} fontColor="#a7f3d0" />,
+    )
+    const body = Array.from(container.querySelectorAll('p')).find(
+      (p) => p.textContent === 'Body line one.',
+    )
+    expect(body).toBeDefined()
+    expect((body as HTMLElement).style.color).toBe('rgb(167, 243, 208)')
+  })
+
+  it('applies fontFamily to body lines', () => {
+    const { container } = render(
+      <Teleprompter initialScript={SCRIPT} storageKey={null} fontFamily="ui-serif, Georgia" />,
+    )
+    const body = Array.from(container.querySelectorAll('p')).find(
+      (p) => p.textContent === 'Body line one.',
+    )
+    expect((body as HTMLElement).style.fontFamily).toContain('ui-serif')
+  })
+
+  it('applies backgroundColor to the wrapper and fade gradients', () => {
+    const { container } = render(
+      <Teleprompter initialScript={SCRIPT} storageKey={null} backgroundColor="#1e1b4b" />,
+    )
+    const wrapper = container.firstChild as HTMLElement
+    expect(wrapper.style.background).toContain('rgb(30, 27, 75)')
+    const fadeTop = container.querySelector('[data-testid="teleprompter-fade-top"]') as HTMLElement
+    expect(fadeTop.style.background).toContain('rgb(30, 27, 75)')
+  })
+
   it('Save & reset writes editor buffer back to scriptText', () => {
     render(<Teleprompter initialScript="original" storageKey={null} />)
     fireEvent.click(screen.getByRole('button', { name: 'Edit' }))

@@ -86,6 +86,13 @@ export interface TeleprompterProps extends UseTeleprompterOptions {
    * is the consumer's responsibility.
    */
   fontFamily?: string
+  /**
+   * Background colour of the teleprompter surface. Drives the wrapper
+   * background AND the top/bottom edge fade gradients so text dissolves
+   * into whatever colour the consumer picks. Any CSS colour. Default
+   * pure black (`#000`).
+   */
+  backgroundColor?: string
 }
 
 const DEFAULT_KEYBOARD_HINT =
@@ -117,6 +124,7 @@ function withAlpha(color: string, alpha: number): string {
     const b = parseInt(m3[1]![2]! + m3[1]![2]!, 16)
     return `rgba(${r}, ${g}, ${b}, ${alpha})`
   }
+  if (alpha === 0) return 'transparent'
   return color
 }
 
@@ -145,6 +153,7 @@ export function Teleprompter({
   fullscreen = true,
   fontColor,
   fontFamily,
+  backgroundColor = '#000',
   ...hookOptions
 }: TeleprompterProps) {
   const t = useTeleprompter(hookOptions)
@@ -228,9 +237,13 @@ export function Teleprompter({
   // this: 50cqh = 50% of the nearest size container's height. We mark
   // the outer wrapper as a size container only when embedded so that the
   // scroller pads relative to the box, not the viewport.
+  const baseRootStyle: CSSProperties = {
+    ...rootStyle,
+    background: backgroundColor,
+  }
   const containerStyle: CSSProperties = fullscreen
-    ? rootStyle
-    : { ...rootStyle, containerType: 'size' }
+    ? baseRootStyle
+    : { ...baseRootStyle, containerType: 'size' }
   const scrollerPadding: CSSProperties = fullscreen
     ? { paddingTop: '50vh', paddingBottom: '50vh' }
     : { paddingTop: '50cqh', paddingBottom: '50cqh' }
@@ -239,8 +252,8 @@ export function Teleprompter({
     <div
       className={
         fullscreen
-          ? 'relative h-screen w-screen overflow-hidden bg-black text-white'
-          : 'relative h-full w-full overflow-hidden bg-black text-white'
+          ? 'relative h-screen w-screen overflow-hidden text-white'
+          : 'relative h-full w-full overflow-hidden text-white'
       }
       style={containerStyle}
     >
@@ -320,17 +333,15 @@ export function Teleprompter({
             className="pointer-events-none absolute left-0 right-0 top-0 z-10"
             style={{
               height: '25vh',
-              background: 'linear-gradient(to bottom, #000 10%, rgba(0,0,0,0) 100%)',
+              background: `linear-gradient(to bottom, ${backgroundColor} 10%, ${withAlpha(backgroundColor, 0)} 100%)`,
             }}
           />
           <div
             data-testid="teleprompter-fade-bottom"
             className="pointer-events-none absolute bottom-0 left-0 right-0 z-10"
             style={{
-              // Sits above the control bar — generous height so the
-              // bottom area also fades cleanly.
               height: '28vh',
-              background: 'linear-gradient(to top, #000 35%, rgba(0,0,0,0) 100%)',
+              background: `linear-gradient(to top, ${backgroundColor} 35%, ${withAlpha(backgroundColor, 0)} 100%)`,
             }}
           />
         </>

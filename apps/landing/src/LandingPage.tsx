@@ -85,10 +85,45 @@ const FEATURES: { title: string; body: string; icon: ReactNode }[] = [
 
 const ACCENTS = [
   { name: 'violet', value: '#8b5cf6' },
-  { name: 'emerald', value: '#10b981' },
-  { name: 'orange', value: '#f97316' },
-  { name: 'cyan', value: '#06b6d4' },
+  { name: 'fuchsia', value: '#d946ef' },
   { name: 'rose', value: '#f43f5e' },
+  { name: 'orange', value: '#f97316' },
+  { name: 'amber', value: '#f59e0b' },
+  { name: 'lime', value: '#84cc16' },
+  { name: 'emerald', value: '#10b981' },
+  { name: 'cyan', value: '#06b6d4' },
+]
+
+const FONT_COLORS = [
+  { name: 'white', value: '#ffffff' },
+  { name: 'cream', value: '#fef3c7' },
+  { name: 'mint', value: '#a7f3d0' },
+  { name: 'sky', value: '#bae6fd' },
+  { name: 'pink', value: '#fbcfe8' },
+  { name: 'lavender', value: '#ddd6fe' },
+  { name: 'peach', value: '#fed7aa' },
+  { name: 'slate', value: '#94a3b8' },
+  { name: 'ink', value: '#0f172a' },
+]
+
+// Backgrounds for the teleprompter surface. The fade gradients derive from
+// this colour automatically (`backgroundColor` prop on Teleprompter), so dark
+// + light backgrounds both fade cleanly.
+const BACKGROUNDS = [
+  { name: 'black', value: '#000000' },
+  { name: 'graphite', value: '#0f1116' },
+  { name: 'midnight', value: '#0b1220' },
+  { name: 'forest', value: '#0a1f1a' },
+  { name: 'plum', value: '#1c0a1f' },
+  { name: 'paper', value: '#f5f3ec' },
+  { name: 'cream', value: '#fdf6e3' },
+]
+
+const FONTS: { label: string; value: string }[] = [
+  { label: 'Sans', value: "ui-sans-serif, -apple-system, 'Inter', system-ui, sans-serif" },
+  { label: 'Serif', value: "ui-serif, Georgia, 'Crimson Pro', 'Times New Roman', serif" },
+  { label: 'Mono', value: "ui-monospace, 'JetBrains Mono', 'Fira Code', monospace" },
+  { label: 'Display', value: "'Playfair Display', 'Georgia', serif" },
 ]
 
 function CopyButton({ text }: { text: string }) {
@@ -113,6 +148,9 @@ function CopyButton({ text }: { text: string }) {
 
 export function LandingPage() {
   const [accent, setAccent] = useState<string>(ACCENTS[0]!.value)
+  const [fontColor, setFontColor] = useState<string>(FONT_COLORS[0]!.value)
+  const [fontFamily, setFontFamily] = useState<string>(FONTS[0]!.value)
+  const [backgroundColor, setBackgroundColor] = useState<string>(BACKGROUNDS[0]!.value)
   const [overlayOpen, setOverlayOpen] = useState(false)
 
   // Esc closes the fullscreen overlay.
@@ -207,20 +245,75 @@ export function LandingPage() {
           </code>
         </div>
 
-        <div className="mx-auto mt-10 flex max-w-md items-center justify-center gap-2 text-xs text-gray-500">
-          <span className="uppercase tracking-widest">accent:</span>
-          {ACCENTS.map((a) => (
-            <button
-              key={a.value}
-              onClick={() => setAccent(a.value)}
-              aria-label={a.name}
-              className="h-7 w-7 rounded-full border border-white/10 transition-all hover:border-white/30"
-              style={{
-                background: a.value,
-                boxShadow: accent === a.value ? `0 0 0 3px ${a.value}55, 0 0 12px ${a.value}` : undefined,
-              }}
-            />
-          ))}
+        <div className="mx-auto mt-10 flex max-w-3xl flex-col items-center justify-center gap-3 text-xs text-gray-500 sm:flex-row sm:flex-wrap sm:gap-x-6">
+          <div className="flex items-center gap-2">
+            <span className="uppercase tracking-widest">accent</span>
+            {ACCENTS.map((a) => (
+              <button
+                key={a.value}
+                onClick={() => setAccent(a.value)}
+                aria-label={`accent ${a.name}`}
+                className="h-7 w-7 rounded-full border border-white/10 transition-all hover:border-white/30"
+                style={{
+                  background: a.value,
+                  boxShadow:
+                    accent === a.value ? `0 0 0 3px ${a.value}55, 0 0 12px ${a.value}` : undefined,
+                }}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="uppercase tracking-widest">text</span>
+            {FONT_COLORS.map((c) => (
+              <button
+                key={c.value}
+                onClick={() => setFontColor(c.value)}
+                aria-label={`text colour ${c.name}`}
+                className="h-7 w-7 rounded-full border border-white/10 transition-all hover:border-white/30"
+                style={{
+                  background: c.value,
+                  boxShadow:
+                    fontColor === c.value ? `0 0 0 3px ${c.value}55, 0 0 12px ${c.value}88` : undefined,
+                }}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="uppercase tracking-widest">font</span>
+            {FONTS.map((f) => (
+              <button
+                key={f.value}
+                onClick={() => setFontFamily(f.value)}
+                aria-label={`font ${f.label}`}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-all ${
+                  fontFamily === f.value
+                    ? 'border-white/40 bg-white/10 text-white'
+                    : 'border-white/10 bg-white/[0.03] text-gray-400 hover:bg-white/10'
+                }`}
+                style={{ fontFamily: f.value }}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="uppercase tracking-widest">bg</span>
+            {BACKGROUNDS.map((b) => (
+              <button
+                key={b.value}
+                onClick={() => setBackgroundColor(b.value)}
+                aria-label={`background ${b.name}`}
+                className="h-7 w-7 rounded-full border border-white/10 transition-all hover:border-white/30"
+                style={{
+                  background: b.value,
+                  boxShadow:
+                    backgroundColor === b.value
+                      ? `0 0 0 3px ${b.value}88, 0 0 12px ${b.value}55`
+                      : undefined,
+                }}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
@@ -246,8 +339,12 @@ export function LandingPage() {
             storageKey={null}
             targetDuration="00:22"
             accentColor={accent}
+            fontColor={fontColor}
+            fontFamily={fontFamily}
+            backgroundColor={backgroundColor}
             keyboardHint={null}
             fullscreen={false}
+            enableEditing={false}
           />
         </div>
         <p className="mt-3 text-center text-xs text-gray-500">
@@ -257,12 +354,16 @@ export function LandingPage() {
 
       {/* Fullscreen overlay */}
       {overlayOpen && (
-        <div className="fixed inset-0 z-50 bg-black">
+        <div className="fixed inset-0 z-50" style={{ background: backgroundColor }}>
           <Teleprompter
             initialScript={SAMPLE_SCRIPT}
             storageKey={null}
             targetDuration="00:22"
             accentColor={accent}
+            fontColor={fontColor}
+            fontFamily={fontFamily}
+            backgroundColor={backgroundColor}
+            enableEditing={false}
           />
           <button
             onClick={() => setOverlayOpen(false)}
