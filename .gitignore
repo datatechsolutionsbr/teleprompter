@@ -3,3 +3,7 @@ dist
 *.tsbuildinfo
 .DS_Store
 .npmrc
+
+# Build outputs from apps/
+apps/*/dist
+apps/*/node_modules
