@@ -206,6 +206,21 @@ export function Teleprompter({
   // Smooth font-size transition unless user opted out / OS reduced motion.
   const lineTransition = motionReduced ? undefined : 'font-size 200ms ease-out'
 
+  // In fullscreen mode the scroller pads to 50vh (viewport units) so the
+  // first line aligns with the centre reader marker. Embedded mode (e.g.
+  // a 560 px box on a landing page) needs container-relative padding —
+  // 50vh would leave half the viewport of empty space and squash the
+  // visible text below the box. CSS container query units (`cqh`) solve
+  // this: 50cqh = 50% of the nearest size container's height. We mark
+  // the outer wrapper as a size container only when embedded so that the
+  // scroller pads relative to the box, not the viewport.
+  const containerStyle: CSSProperties = fullscreen
+    ? rootStyle
+    : { ...rootStyle, containerType: 'size' }
+  const scrollerPadding: CSSProperties = fullscreen
+    ? { paddingTop: '50vh', paddingBottom: '50vh' }
+    : { paddingTop: '50cqh', paddingBottom: '50cqh' }
+
   return (
     <div
       className={
@@ -213,13 +228,19 @@ export function Teleprompter({
           ? 'relative h-screen w-screen overflow-hidden bg-black text-white'
           : 'relative h-full w-full overflow-hidden bg-black text-white'
       }
-      style={rootStyle}
+      style={containerStyle}
     >
-      {/* Scroller — pt aligns first script line with the reader marker (50vh) */}
+      {/* Scroller — pt aligns first script line with the reader marker
+          (centre of viewport in fullscreen mode, centre of the embedding
+          box in embedded mode). */}
       <div
         ref={scrollerRef}
-        className="h-full w-full overflow-y-auto px-4 pb-[50vh] pt-[50vh] sm:px-8"
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        className="h-full w-full overflow-y-auto px-4 sm:px-8"
+        style={{
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+          ...scrollerPadding,
+        }}
         onClick={() => {
           if (!editing) togglePlay()
         }}
