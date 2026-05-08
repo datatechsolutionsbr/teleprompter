@@ -3,8 +3,6 @@
 
   <p>
     <strong>Drop-in React teleprompter</strong> — auto-scroll, mirror, section labels, keyboard control.
-    <br/>
-    Extracted from the <a href="https://github.com/kori-app/pitch-deck">Astrlabe / Datatech pitch deck</a>.
   </p>
 
   <p>
@@ -21,9 +19,7 @@
 ## Why
 
 Existing teleprompter tools are either ugly, expensive, or both. This one
-is opinionated, beautiful, and free — built originally to rehearse our YC
-pitch and shipped publicly so any founder can grab it before their next
-demo.
+is opinionated, beautiful, and free.
 
 ```sh
 npm install @datatechsolutions/teleprompter
@@ -188,7 +184,7 @@ Not yet. v1.0.0 will optionally ship a vanilla CSS sheet — see [#4](https://gi
 
 **Is the AI version free?**
 v0.4.0 will add AI script generation + tone shift via a hosted proxy. Free
-tier capped, paid tier unlimited via Astrlabe. See [RFC #14](https://github.com/kori-app/teleprompter/issues/14).
+tier capped. See [RFC #14](https://github.com/kori-app/teleprompter/issues/14).
 
 **Mobile?**
 Works today (responsive control bar, viewport-aware font size). Touch
@@ -223,11 +219,3 @@ Issues + PRs welcome. The roadmap is public:
 ## License
 
 MIT — see [LICENSE](./LICENSE).
-
-<div align="center">
-  <br/>
-  <sub>
-    Built with <a href="https://github.com/kori-app/astrlabe">Astrlabe</a> ·
-    <a href="https://datatechsolutions.com.br?ref=teleprompter">datatechsolutions.com.br</a>
-  </sub>
-</div>

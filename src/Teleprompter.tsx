@@ -67,6 +67,13 @@ export interface TeleprompterProps extends UseTeleprompterOptions {
    * `prefers-reduced-motion: reduce`.
    */
   reducedMotion?: boolean
+  /**
+   * When `true` (default) the teleprompter takes the entire viewport
+   * (`h-screen w-screen`). Set `false` to make it fill its containing block
+   * instead — the parent must have an explicit height. Useful for embedded
+   * previews on landing pages or modal overlays.
+   */
+  fullscreen?: boolean
 }
 
 const DEFAULT_KEYBOARD_HINT =
@@ -123,6 +130,7 @@ export function Teleprompter({
   showProgressBar = true,
   fadeEdges = true,
   reducedMotion,
+  fullscreen = true,
   ...hookOptions
 }: TeleprompterProps) {
   const t = useTeleprompter(hookOptions)
@@ -200,7 +208,11 @@ export function Teleprompter({
 
   return (
     <div
-      className="relative h-screen w-screen overflow-hidden bg-black text-white"
+      className={
+        fullscreen
+          ? 'relative h-screen w-screen overflow-hidden bg-black text-white'
+          : 'relative h-full w-full overflow-hidden bg-black text-white'
+      }
       style={rootStyle}
     >
       {/* Scroller — pt aligns first script line with the reader marker (50vh) */}
