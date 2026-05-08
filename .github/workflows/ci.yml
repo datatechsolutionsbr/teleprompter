@@ -16,6 +16,7 @@ jobs:
           node-version: '20'
       - run: npm ci
       - run: npm run type-check
+      - run: npm test
       - run: npm run build
       - name: Verify dist contents
         run: |

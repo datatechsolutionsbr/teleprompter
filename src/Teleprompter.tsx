@@ -10,7 +10,7 @@
  *       "./node_modules/@datatechsolutions/teleprompter/dist/**\/*.{js,mjs,cjs}"
  *     ]
  */
-import { useCallback, useEffect, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 
 import {
   ArrowPathIcon,
@@ -44,10 +44,35 @@ export interface TeleprompterProps extends UseTeleprompterOptions {
   controlsAccessory?: ReactNode
   /** Override the keyboard hint string. Pass `null` to hide. */
   keyboardHint?: string | null
+  /**
+   * Accent colour driving the active controls, section labels, reader marker,
+   * and progress bar. Any CSS colour string. Default violet-500.
+   */
+  accentColor?: string
+  /**
+   * Render a thin progress bar at the bottom of the viewport (above the
+   * control bar) showing how far through the script the user has scrolled.
+   * Default `true`.
+   */
+  showProgressBar?: boolean
+  /**
+   * Soft fade gradients at the top + bottom of the scroller so text
+   * materialises and dissolves at the edges instead of being hard-cut.
+   * Default `true`.
+   */
+  fadeEdges?: boolean
+  /**
+   * Disable the playing-state pulse on the reader marker + smooth easing on
+   * size/speed transitions. Auto-enabled when the OS reports
+   * `prefers-reduced-motion: reduce`.
+   */
+  reducedMotion?: boolean
 }
 
 const DEFAULT_KEYBOARD_HINT =
   'Space play · ↑↓ speed · ± size · M mirror · E edit · R reset'
+
+const DEFAULT_ACCENT = '#8b5cf6' // violet-500
 
 function formatTime(ms: number) {
   const totalSeconds = Math.floor(ms / 1000)
@@ -56,11 +81,48 @@ function formatTime(ms: number) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
+/** Hex colour → rgba string with the given alpha (0-1). Falls back to the
+ *  literal hex if it doesn't look like #RGB / #RRGGBB so any CSS colour
+ *  (oklch, named, etc.) still works at full opacity. */
+function withAlpha(color: string, alpha: number): string {
+  const hex = color.trim()
+  const m6 = /^#([0-9a-f]{6})$/i.exec(hex)
+  if (m6) {
+    const v = parseInt(m6[1]!, 16)
+    return `rgba(${(v >> 16) & 0xff}, ${(v >> 8) & 0xff}, ${v & 0xff}, ${alpha})`
+  }
+  const m3 = /^#([0-9a-f]{3})$/i.exec(hex)
+  if (m3) {
+    const r = parseInt(m3[1]![0]! + m3[1]![0]!, 16)
+    const g = parseInt(m3[1]![1]! + m3[1]![1]!, 16)
+    const b = parseInt(m3[1]![2]! + m3[1]![2]!, 16)
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`
+  }
+  return color
+}
+
+function usePrefersReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false)
+  useEffect(() => {
+    if (typeof window === 'undefined' || !window.matchMedia) return
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setReduced(mq.matches)
+    const onChange = () => setReduced(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+  return reduced
+}
+
 export function Teleprompter({
   targetDuration = '01:00',
   enableEditing = true,
   controlsAccessory,
   keyboardHint = DEFAULT_KEYBOARD_HINT,
+  accentColor = DEFAULT_ACCENT,
+  showProgressBar = true,
+  fadeEdges = true,
+  reducedMotion,
   ...hookOptions
 }: TeleprompterProps) {
   const t = useTeleprompter(hookOptions)
@@ -81,8 +143,12 @@ export function Teleprompter({
     scrollerRef,
   } = t
 
+  const osReducedMotion = usePrefersReducedMotion()
+  const motionReduced = reducedMotion ?? osReducedMotion
+
   const [editing, setEditing] = useState(false)
   const [editBuffer, setEditBuffer] = useState(scriptText)
+  const [progress, setProgress] = useState(0) // 0..1
 
   const openEditor = useCallback(() => {
     setEditBuffer(scriptText)
@@ -100,13 +166,43 @@ export function Teleprompter({
     setEditing(false)
   }, [scriptText])
 
+  // Track scroll progress for the bottom progress bar. Reads scrollTop on
+  // every scroll event — cheap because the scroller is the one DOM node
+  // that already drives the auto-scroll loop.
+  useEffect(() => {
+    const el = scrollerRef.current
+    if (!el || !showProgressBar) return
+    const update = () => {
+      const max = el.scrollHeight - el.clientHeight
+      setProgress(max > 0 ? el.scrollTop / max : 0)
+    }
+    update()
+    el.addEventListener('scroll', update, { passive: true })
+    return () => el.removeEventListener('scroll', update)
+  }, [scrollerRef, showProgressBar, scriptText])
+
   // E key opens the editor (kept here, not in the hook, because the hook
   // is supposed to be UI-agnostic — only the component knows about the
   // edit modal).
   useEditShortcut(enableEditing && !editing, openEditor)
 
+  // CSS variables for accent-driven styling. Tailwind classes that need
+  // this colour read it via `var(--tp-accent)` in inline style props.
+  const rootStyle: CSSProperties & Record<string, string> = {
+    ['--tp-accent' as string]: accentColor,
+    ['--tp-accent-soft' as string]: withAlpha(accentColor, 0.4),
+    ['--tp-accent-softer' as string]: withAlpha(accentColor, 0.1),
+    ['--tp-accent-text' as string]: withAlpha(accentColor, 0.7),
+  }
+
+  // Smooth font-size transition unless user opted out / OS reduced motion.
+  const lineTransition = motionReduced ? undefined : 'font-size 200ms ease-out'
+
   return (
-    <div className="relative h-screen w-screen overflow-hidden bg-black text-white">
+    <div
+      className="relative h-screen w-screen overflow-hidden bg-black text-white"
+      style={rootStyle}
+    >
       {/* Scroller — pt aligns first script line with the reader marker (50vh) */}
       <div
         ref={scrollerRef}
@@ -118,6 +214,10 @@ export function Teleprompter({
       >
         <style>{`
           .teleprompter-scroller::-webkit-scrollbar { display: none; }
+          @keyframes teleprompter-marker-pulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.85; }
+          }
         `}</style>
         <div
           className="teleprompter-scroller mx-auto max-w-[1100px]"
@@ -131,8 +231,12 @@ export function Teleprompter({
               return (
                 <p
                   key={i}
-                  className="my-3 select-none font-semibold uppercase tracking-[0.25em] text-violet-400/70"
-                  style={{ fontSize: Math.max(14, fontSize * 0.32) }}
+                  className="my-3 select-none font-semibold uppercase tracking-[0.25em]"
+                  style={{
+                    fontSize: Math.max(14, fontSize * 0.32),
+                    color: 'var(--tp-accent-text)',
+                    transition: lineTransition,
+                  }}
                 >
                   {line.text.replace(/^\/\/\s*/, '')}
                 </p>
@@ -142,7 +246,12 @@ export function Teleprompter({
               <p
                 key={i}
                 className="mb-6 leading-[1.25] text-white"
-                style={{ fontSize, fontWeight: 600, textWrap: 'balance' }}
+                style={{
+                  fontSize,
+                  fontWeight: 600,
+                  textWrap: 'balance',
+                  transition: lineTransition,
+                }}
               >
                 {line.text}
               </p>
@@ -151,14 +260,73 @@ export function Teleprompter({
         </div>
       </div>
 
-      {/* Center reader marker */}
-      <div className="pointer-events-none absolute left-0 right-0 top-1/2 z-10 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-violet-500/40 to-transparent" />
-      <div className="pointer-events-none absolute left-2 right-2 top-1/2 z-10 flex -translate-y-1/2 justify-between text-violet-400/50">
+      {/* Edge fade gradients — pointer-events:none so clicks still hit the
+          scroller below. Top fades from solid black to transparent so text
+          enters/exits the visible area gracefully. */}
+      {fadeEdges && (
+        <>
+          <div
+            data-testid="teleprompter-fade-top"
+            className="pointer-events-none absolute left-0 right-0 top-0 z-10"
+            style={{
+              height: '25vh',
+              background: 'linear-gradient(to bottom, #000 10%, rgba(0,0,0,0) 100%)',
+            }}
+          />
+          <div
+            data-testid="teleprompter-fade-bottom"
+            className="pointer-events-none absolute bottom-0 left-0 right-0 z-10"
+            style={{
+              // Sits above the control bar — generous height so the
+              // bottom area also fades cleanly.
+              height: '28vh',
+              background: 'linear-gradient(to top, #000 35%, rgba(0,0,0,0) 100%)',
+            }}
+          />
+        </>
+      )}
+
+      {/* Center reader marker — gradient line at the focus zone. Pulses
+          softly while playing so the speaker has a peripheral cue that
+          the script is moving, even before the text itself shifts. */}
+      <div
+        className="pointer-events-none absolute left-0 right-0 top-1/2 z-10 h-px -translate-y-1/2"
+        style={{
+          background: `linear-gradient(to right, transparent, ${withAlpha(accentColor, 0.5)}, transparent)`,
+          animation:
+            isPlaying && !motionReduced
+              ? 'teleprompter-marker-pulse 2.4s ease-in-out infinite'
+              : undefined,
+        }}
+      />
+      <div
+        className="pointer-events-none absolute left-2 right-2 top-1/2 z-10 flex -translate-y-1/2 justify-between"
+        style={{ color: 'var(--tp-accent-text)' }}
+      >
         <span className="text-[10px] font-bold tracking-widest">▶</span>
         <span className="text-[10px] font-bold tracking-widest">◀</span>
       </div>
 
-      {/* Bottom control bar */}
+      {/* Progress bar — sits just above the control bar, tracks scrollTop. */}
+      {showProgressBar && (
+        <div
+          data-testid="teleprompter-progress-track"
+          className="pointer-events-none absolute bottom-[var(--tp-controlbar-h,3.25rem)] left-0 right-0 z-20 h-[2px]"
+          style={{ background: 'rgba(255,255,255,0.06)' }}
+        >
+          <div
+            data-testid="teleprompter-progress-bar"
+            className="h-full"
+            style={{
+              width: `${Math.max(0, Math.min(1, progress)) * 100}%`,
+              background: accentColor,
+              transition: motionReduced ? undefined : 'width 120ms linear',
+            }}
+          />
+        </div>
+      )}
+
+      {/* Bottom control bar — wraps to multi-row on narrow screens */}
       <div className="absolute bottom-0 left-0 right-0 z-20 flex flex-wrap items-center gap-2 border-t border-white/10 bg-black/80 px-2 py-2 backdrop-blur-xl sm:gap-3 sm:px-4 sm:py-2.5">
         <button
           type="button"
@@ -186,11 +354,20 @@ export function Teleprompter({
         <button
           type="button"
           onClick={toggleMirror}
-          className={`flex h-9 w-9 items-center justify-center rounded-full border transition-colors sm:w-auto sm:gap-1.5 sm:px-3 sm:text-sm sm:font-semibold ${
+          className={
             mirror
-              ? 'border-violet-400/50 bg-violet-500/15 text-violet-200'
-              : 'border-white/15 bg-white/5 text-gray-300 hover:bg-white/10'
-          }`}
+              ? 'flex h-9 w-9 items-center justify-center rounded-full border transition-colors sm:w-auto sm:gap-1.5 sm:px-3 sm:text-sm sm:font-semibold'
+              : 'flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 sm:w-auto sm:gap-1.5 sm:px-3 sm:text-sm sm:font-semibold'
+          }
+          style={
+            mirror
+              ? {
+                  borderColor: withAlpha(accentColor, 0.5),
+                  background: 'var(--tp-accent-softer)',
+                  color: 'var(--tp-accent-text)',
+                }
+              : undefined
+          }
           title="Mirror (M)"
           aria-label="Mirror"
         >
@@ -297,7 +474,17 @@ export function Teleprompter({
               <button
                 type="button"
                 onClick={saveEdit}
-                className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-bold text-white hover:shadow-lg hover:shadow-violet-500/40"
+                className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-bold text-white hover:shadow-lg"
+                style={{
+                  background: `linear-gradient(to right, ${accentColor}, ${accentColor})`,
+                  boxShadow: `0 0 0 0 ${withAlpha(accentColor, 0)}`,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = `0 10px 25px -5px ${withAlpha(accentColor, 0.4)}`
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = `0 0 0 0 ${withAlpha(accentColor, 0)}`
+                }}
               >
                 <CheckIcon className="h-4 w-4" /> Save & reset
               </button>
