@@ -74,6 +74,18 @@ export interface TeleprompterProps extends UseTeleprompterOptions {
    * previews on landing pages or modal overlays.
    */
   fullscreen?: boolean
+  /**
+   * Body text colour. Defaults to white. Section labels keep deriving
+   * from `accentColor`.
+   */
+  fontColor?: string
+  /**
+   * Font family applied to body lines and section labels. Any CSS
+   * font-family value. Defaults to the browser's sans-serif fallback —
+   * loading the typeface (e.g. via `<link rel="stylesheet">` or `@font-face`)
+   * is the consumer's responsibility.
+   */
+  fontFamily?: string
 }
 
 const DEFAULT_KEYBOARD_HINT =
@@ -131,6 +143,8 @@ export function Teleprompter({
   fadeEdges = true,
   reducedMotion,
   fullscreen = true,
+  fontColor,
+  fontFamily,
   ...hookOptions
 }: TeleprompterProps) {
   const t = useTeleprompter(hookOptions)
@@ -268,6 +282,7 @@ export function Teleprompter({
                   style={{
                     fontSize: Math.max(14, fontSize * 0.32),
                     color: 'var(--tp-accent-text)',
+                    fontFamily,
                     transition: lineTransition,
                   }}
                 >
@@ -278,11 +293,13 @@ export function Teleprompter({
             return (
               <p
                 key={i}
-                className="mb-6 leading-[1.25] text-white"
+                className="mb-6 leading-[1.25]"
                 style={{
                   fontSize,
                   fontWeight: 600,
                   textWrap: 'balance',
+                  color: fontColor ?? '#fff',
+                  fontFamily,
                   transition: lineTransition,
                 }}
               >

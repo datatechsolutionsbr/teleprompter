@@ -137,9 +137,18 @@ export function LandingPage() {
 
       {/* Top nav */}
       <header className="relative z-10 mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="flex items-center gap-3 text-sm font-semibold">
+        <div className="flex items-center gap-3 text-base font-bold tracking-tight">
           <Logo accent={accent} size={32} />
-          <span className="text-white">teleprompter</span>
+          <span
+            style={{
+              background: `linear-gradient(135deg, #fff 0%, ${accent} 100%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            teleprompter
+          </span>
         </div>
         <div className="flex items-center gap-3 text-sm">
           <a
@@ -171,8 +180,19 @@ export function LandingPage() {
         </div>
 
         <h1 className="text-balance text-5xl font-bold tracking-tight sm:text-6xl">
-          The teleprompter <br className="hidden sm:block" />
-          <span style={{ color: accent }}>your scripts deserve.</span>
+          The{' '}
+          <span
+            style={{
+              background: `linear-gradient(135deg, ${accent} 0%, #fff 60%)`,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}
+          >
+            teleprompter
+          </span>{' '}
+          <br className="hidden sm:block" />
+          your scripts deserve.
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-balance text-lg leading-relaxed text-gray-400">
           A drop-in React teleprompter with auto-scroll, section labels, mirror mode, and keyboard
