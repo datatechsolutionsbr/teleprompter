@@ -6,3 +6,8 @@ export {
   type UseTeleprompterOptions,
   type UseTeleprompterReturn,
 } from './useTeleprompter.js'
+export {
+  useVoicePaced,
+  type VoicePacedOptions,
+  type VoicePacedReturn,
+} from './useVoicePaced.js'

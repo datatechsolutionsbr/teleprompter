@@ -2,24 +2,37 @@
   <img src="./assets/wordmark.svg" alt="@datatechsolutions/teleprompter" width="520">
 
   <p>
-    <strong>Drop-in React teleprompter</strong> — auto-scroll, mirror, section labels, keyboard control.
+    <strong>Drop-in React teleprompter</strong> — voice-paced auto-scroll, mirror, section labels, keyboard control.
   </p>
+
+  <!--
+    Hero demo GIF — record a 15-20s loop with QuickTime / OBS showing
+    voice pacing + mirror + section labels. Export at 1280×720, 18fps,
+    optimize via ezgif.com to ~1.5 MB. Save as ./assets/hero.gif.
+  -->
+  <img src="./assets/hero.gif" alt="Teleprompter demo" width="720">
 
   <p>
     <a href="https://www.npmjs.com/package/@datatechsolutions/teleprompter"><img src="https://img.shields.io/npm/v/@datatechsolutions/teleprompter.svg?color=8b5cf6&label=npm&style=flat-square" alt="npm"></a>
     <a href="https://github.com/datatechsolutionsbr/teleprompter/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@datatechsolutions/teleprompter.svg?color=8b5cf6&style=flat-square" alt="license"></a>
-    <img src="https://img.shields.io/badge/types-bundled-8b5cf6?style=flat-square" alt="types">
+    <img src="https://img.shields.io/badge/bundle-33%20KB-8b5cf6?style=flat-square" alt="bundle size">
     <img src="https://img.shields.io/badge/zero-runtime%20deps-8b5cf6?style=flat-square" alt="zero deps">
-    <img src="https://img.shields.io/badge/react-18%2B-8b5cf6?style=flat-square" alt="react 18+">
+    <img src="https://img.shields.io/badge/react-18%20%7C%2019-8b5cf6?style=flat-square" alt="react 18 or 19">
+    <img src="https://img.shields.io/badge/tests-59%20passing-8b5cf6?style=flat-square" alt="tests">
   </p>
 </div>
 
 ---
 
-## Why
+## Why I built this
 
-Existing teleprompter tools are either ugly, expensive, or both. This one
-is opinionated, beautiful, and free.
+I needed a teleprompter for my YC pitch. Existing options were either
+$400 desktop apps, ad-walled freemium sites, or browser tools that
+couldn't mirror text for an autocue rig without paying. So I shipped this
+in a weekend and used it live.
+
+Open-sourced because every founder doing a demo needs this, and nobody
+should have to learn FFmpeg to get text scrolling on screen.
 
 ```sh
 npm install @datatechsolutions/teleprompter
@@ -45,7 +58,11 @@ rigs.
 
 ## What you get
 
-- 🎬 **Auto-scroll** — 10–300 px/sec, adjustable live
+- 🎤 **Voice-paced auto-scroll** — mic listens, WPM is measured, scroll
+  follows your speaking pace in real time. Pure Web Speech API,
+  zero backend
+- 🎬 **Manual auto-scroll** — 10–300 px/sec, adjustable live (fallback
+  when voice pacing is off or unsupported)
 - 🎨 **Section labels** — `// 0–5s · Hook` syntax for free
 - 🔄 **Mirror mode** — for autocue rigs that read off a beam-splitter
 - ⌨️ **Keyboard shortcuts** — Space, ↑↓, +/-, M, E, R
@@ -83,6 +100,51 @@ The hook handles requestAnimationFrame, keyboard, localStorage, elapsed
 timer — you decide how to render.
 </details>
 
+<details>
+<summary><strong>Voice-paced autoscroll — how it works</strong></summary>
+
+Enable from the component:
+
+```tsx
+<Teleprompter initialScript={SCRIPT} voicePaced />
+```
+
+…or tune the pacing model:
+
+```tsx
+<Teleprompter
+  initialScript={SCRIPT}
+  voicePaced={{
+    lang: 'pt-BR',
+    windowMs: 5000,        // sliding window for WPM averaging
+    targetWpm: 150,        // pace that maps to baselineSpeed
+    baselineSpeed: 60,     // px/sec at targetWpm
+  }}
+/>
+```
+
+Mid-talk, the controls show a live `142 WPM` readout. Click the mic
+button (or remove `voicePaced` prop) to fall back to manual speed.
+
+Browser support: Chromium-based browsers (Chrome, Edge, Brave, Arc) on
+desktop + Android Chrome. The mic button auto-hides on unsupported
+browsers — you don't need to gate the prop yourself.
+
+Standalone hook (use without the component):
+
+```tsx
+import { useVoicePaced } from '@datatechsolutions/teleprompter'
+
+const { supported, active, wpm, derivedSpeed, toggle } = useVoicePaced({
+  lang: 'en-US',
+})
+```
+
+Returns a speed in px/sec that follows the speaker's WPM — wire it into
+whatever scroll loop you already have.
+
+</details>
+
 ## Tailwind required
 
 This package uses Tailwind utility classes. Add the dist path to your
@@ -115,6 +177,7 @@ your bundle stays lean.
 | `speedRange`        | `{ min, max, step }` | `{ 10, 300, 10 }`                      | Bounds for speed bumps. |
 | `fontSizeRange`     | `{ min, max, step }` | `{ 20, 120, 4 }`                       | Bounds for font size bumps. |
 | `targetDuration`    | `string \| null`     | `'01:00'`                              | Shown next to elapsed timer. |
+| `voicePaced`        | `boolean \| VoicePacedOptions` | `false`                      | Enable mic-driven autoscroll. See [voice-paced section](#voice-paced-autoscroll--how-it-works). |
 | `enableEditing`     | `boolean`            | `true`                                 | Show the in-built edit modal. |
 | `controlsAccessory` | `ReactNode`          | —                                      | Extra UI in the control bar. |
 | `keyboardHint`      | `string \| null`     | (default hint string)                  | Override or hide the hint at the bottom. |

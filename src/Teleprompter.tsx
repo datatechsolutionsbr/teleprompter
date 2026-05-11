@@ -16,6 +16,8 @@ import {
   ArrowPathIcon,
   ArrowsRightLeftIcon,
   CheckIcon,
+  MicrophoneIcon,
+  MicrophoneSlashIcon,
   MinusIcon,
   PauseIcon,
   PencilSquareIcon,
@@ -172,6 +174,7 @@ export function Teleprompter({
     toggleMirror,
     elapsedMs,
     scrollerRef,
+    voicePaced,
   } = t
 
   const osReducedMotion = usePrefersReducedMotion()
@@ -446,6 +449,45 @@ export function Teleprompter({
           >
             <PencilSquareIcon className="h-4 w-4" />
             <span className="hidden sm:inline">Edit</span>
+          </button>
+        )}
+
+        {/* Voice-paced toggle. Hidden when the browser has no Web Speech
+            API so unsupported viewers don't see a broken affordance. */}
+        {voicePaced.supported && (
+          <button
+            type="button"
+            onClick={voicePaced.toggle}
+            className={
+              voicePaced.active
+                ? 'flex h-9 w-9 items-center justify-center rounded-full border transition-colors sm:w-auto sm:gap-1.5 sm:px-3 sm:text-sm sm:font-semibold'
+                : 'flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-gray-300 transition-colors hover:bg-white/10 sm:w-auto sm:gap-1.5 sm:px-3 sm:text-sm sm:font-semibold'
+            }
+            style={
+              voicePaced.active
+                ? {
+                    borderColor: withAlpha(accentColor, 0.5),
+                    background: 'var(--tp-accent-softer)',
+                    color: 'var(--tp-accent-text)',
+                  }
+                : undefined
+            }
+            title={
+              voicePaced.active
+                ? `Voice pacing on · ${Math.round(voicePaced.wpm)} WPM`
+                : 'Voice-paced autoscroll'
+            }
+            aria-label="Toggle voice pacing"
+            aria-pressed={voicePaced.active}
+          >
+            {voicePaced.active ? (
+              <MicrophoneIcon className="h-4 w-4" />
+            ) : (
+              <MicrophoneSlashIcon className="h-4 w-4" />
+            )}
+            <span className="hidden sm:inline">
+              {voicePaced.active ? `${Math.round(voicePaced.wpm)} WPM` : 'Voice'}
+            </span>
           </button>
         )}
 

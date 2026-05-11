@@ -10,6 +10,8 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
+import { useVoicePaced, type VoicePacedOptions } from './useVoicePaced.js'
+
 export interface Line {
   text: string
   isComment: boolean
@@ -33,6 +35,16 @@ export interface UseTeleprompterOptions {
   speedRange?: { min: number; max: number; step?: number }
   /** Min/max bounds for font size. Default 20–120 px. */
   fontSizeRange?: { min: number; max: number; step?: number }
+  /**
+   * Voice-paced autoscroll. When enabled, the mic listens (Web Speech
+   * API) and adjusts `speed` in real time to match the speaker's pace.
+   * `true` opts in with defaults; pass an object to tune
+   * `lang`, `targetWpm`, `baselineSpeed`, etc.
+   *
+   * Browser support: Chromium-based only. `supported: false` in the
+   * returned `voicePaced` block when unavailable.
+   */
+  voicePaced?: boolean | VoicePacedOptions
 }
 
 export interface UseTeleprompterReturn {
@@ -68,6 +80,18 @@ export interface UseTeleprompterReturn {
 
   /** Attach to your scroll container. */
   scrollerRef: React.MutableRefObject<HTMLDivElement | null>
+
+  /**
+   * Voice-paced autoscroll state. `supported: false` on browsers without
+   * Web Speech API; toggling does nothing in that case.
+   */
+  voicePaced: {
+    supported: boolean
+    active: boolean
+    wpm: number
+    toggle: () => void
+    error: string | null
+  }
 }
 
 const DEFAULT_OPTIONS: Required<Pick<UseTeleprompterOptions, 'storageKey' | 'enableKeyboard'>> & {
@@ -123,6 +147,23 @@ export function useTeleprompter(options: UseTeleprompterOptions = {}): UseTelepr
 
   const lines = useMemo(() => parseScript(scriptText), [scriptText])
 
+  // Voice-paced autoscroll. Pass through user options (or empty when
+  // they only said `true`); start listening immediately if requested.
+  const voicePacedOpts: VoicePacedOptions =
+    typeof options.voicePaced === 'object' ? options.voicePaced : {}
+  const voicePacedShouldStart =
+    options.voicePaced === true ||
+    (typeof options.voicePaced === 'object' && (options.voicePaced as VoicePacedOptions))
+  const voice = useVoicePaced(voicePacedOpts)
+  useEffect(() => {
+    if (voicePacedShouldStart && voice.supported && !voice.active) {
+      voice.start()
+    }
+    // start is only called once on mount when the consumer opted in
+    // declaratively; afterwards the user toggles via the returned API.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [voicePacedShouldStart])
+
   const setSpeed = useCallback(
     (v: number) => setSpeedState(Math.max(speedRange.min, Math.min(speedRange.max, v))),
     [speedRange.min, speedRange.max],
@@ -169,9 +210,14 @@ export function useTeleprompter(options: UseTeleprompterOptions = {}): UseTelepr
       const last = lastTickRef.current ?? now
       const dt = (now - last) / 1000
       lastTickRef.current = now
+      // Use the voice-derived speed when the mic is actively listening;
+      // otherwise fall back to the manual `speed` state. This means a
+      // single source-of-truth `effectiveSpeed` flows through the scroll
+      // loop without the consumer needing to wire anything.
+      const effectiveSpeed = voice.active ? voice.derivedSpeed : speed
       const el = scrollerRef.current
       if (el) {
-        el.scrollTop += speed * dt
+        el.scrollTop += effectiveSpeed * dt
         const reachedEnd = el.scrollTop + el.clientHeight >= el.scrollHeight - 1
         if (reachedEnd) {
           setIsPlaying(false)
@@ -185,7 +231,7 @@ export function useTeleprompter(options: UseTeleprompterOptions = {}): UseTelepr
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
-  }, [isPlaying, speed])
+  }, [isPlaying, speed, voice.active, voice.derivedSpeed])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -248,5 +294,12 @@ export function useTeleprompter(options: UseTeleprompterOptions = {}): UseTelepr
     toggleMirror,
     elapsedMs,
     scrollerRef,
+    voicePaced: {
+      supported: voice.supported,
+      active: voice.active,
+      wpm: voice.wpm,
+      toggle: voice.toggle,
+      error: voice.error,
+    },
   }
 }
