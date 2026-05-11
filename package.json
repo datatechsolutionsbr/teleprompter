@@ -1,16 +1,16 @@
 {
   "name": "@datatechsolutions/teleprompter",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "Drop-in React teleprompter — auto-scroll, mirror, section labels, keyboard control. Extracted from the Astrlabe / Datatech pitch deck.",
   "license": "MIT",
   "author": "Datatech Solutions",
-  "homepage": "https://github.com/kori-app/teleprompter#readme",
+  "homepage": "https://github.com/datatechsolutionsbr/teleprompter#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kori-app/teleprompter.git"
+    "url": "git+https://github.com/datatechsolutionsbr/teleprompter.git"
   },
   "bugs": {
-    "url": "https://github.com/kori-app/teleprompter/issues"
+    "url": "https://github.com/datatechsolutionsbr/teleprompter/issues"
   },
   "keywords": [
     "teleprompter",

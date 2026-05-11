@@ -190,7 +190,7 @@ export function LandingPage() {
         </div>
         <div className="flex items-center gap-3 text-sm">
           <a
-            href="https://github.com/kori-app/teleprompter"
+            href="https://github.com/datatechsolutionsbr/teleprompter"
             target="_blank"
             rel="noreferrer"
             className="rounded-full border border-white/10 bg-white/5 px-4 py-2 font-semibold hover:bg-white/10"
@@ -466,7 +466,7 @@ export function LandingPage() {
           <p className="mt-3 max-w-2xl text-gray-400">
             Public roadmap. Vote with thumbs-up on{' '}
             <a
-              href="https://github.com/kori-app/teleprompter/issues"
+              href="https://github.com/datatechsolutionsbr/teleprompter/issues"
               className="underline hover:text-white"
             >
               GitHub issues
@@ -510,16 +510,16 @@ export function LandingPage() {
       {/* Footer */}
       <footer className="relative z-10 border-t border-white/10 px-6 py-10 text-center text-sm text-gray-500">
         <div className="flex justify-center gap-6 text-xs">
-          <a href="https://github.com/kori-app/teleprompter" className="hover:text-white">
+          <a href="https://github.com/datatechsolutionsbr/teleprompter" className="hover:text-white">
             GitHub
           </a>
           <a href="https://www.npmjs.com/package/@datatechsolutions/teleprompter" className="hover:text-white">
             npm
           </a>
-          <a href="https://github.com/kori-app/teleprompter/issues" className="hover:text-white">
+          <a href="https://github.com/datatechsolutionsbr/teleprompter/issues" className="hover:text-white">
             Issues
           </a>
-          <a href="https://github.com/kori-app/teleprompter/blob/main/LICENSE" className="hover:text-white">
+          <a href="https://github.com/datatechsolutionsbr/teleprompter/blob/main/LICENSE" className="hover:text-white">
             MIT License
           </a>
         </div>

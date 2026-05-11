@@ -7,7 +7,7 @@
 
   <p>
     <a href="https://www.npmjs.com/package/@datatechsolutions/teleprompter"><img src="https://img.shields.io/npm/v/@datatechsolutions/teleprompter.svg?color=8b5cf6&label=npm&style=flat-square" alt="npm"></a>
-    <a href="https://github.com/kori-app/teleprompter/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@datatechsolutions/teleprompter.svg?color=8b5cf6&style=flat-square" alt="license"></a>
+    <a href="https://github.com/datatechsolutionsbr/teleprompter/blob/main/LICENSE"><img src="https://img.shields.io/npm/l/@datatechsolutions/teleprompter.svg?color=8b5cf6&style=flat-square" alt="license"></a>
     <img src="https://img.shields.io/badge/types-bundled-8b5cf6?style=flat-square" alt="types">
     <img src="https://img.shields.io/badge/zero-runtime%20deps-8b5cf6?style=flat-square" alt="zero deps">
     <img src="https://img.shields.io/badge/react-18%2B-8b5cf6?style=flat-square" alt="react 18+">
@@ -180,15 +180,15 @@ whole UI shifts in sync.
 ## FAQ
 
 **Does it work without Tailwind?**
-Not yet. v1.0.0 will optionally ship a vanilla CSS sheet — see [#4](https://github.com/kori-app/teleprompter/issues/4).
+Not yet. v1.0.0 will optionally ship a vanilla CSS sheet — see [#4](https://github.com/datatechsolutionsbr/teleprompter/issues/4).
 
 **Is the AI version free?**
 v0.4.0 will add AI script generation + tone shift via a hosted proxy. Free
-tier capped. See [RFC #14](https://github.com/kori-app/teleprompter/issues/14).
+tier capped. See [RFC #14](https://github.com/datatechsolutionsbr/teleprompter/issues/14).
 
 **Mobile?**
 Works today (responsive control bar, viewport-aware font size). Touch
-gestures (swipe / pinch) coming in v0.3.0 — [#12](https://github.com/kori-app/teleprompter/issues/12).
+gestures (swipe / pinch) coming in v0.3.0 — [#12](https://github.com/datatechsolutionsbr/teleprompter/issues/12).
 
 **SSR?**
 Yes — `parseScript` and the hook short-circuit on `typeof window === 'undefined'`,
@@ -212,9 +212,9 @@ a real Vite dev server consuming the package via npm link.
 
 Issues + PRs welcome. The roadmap is public:
 
-- [v0.2.0](https://github.com/kori-app/teleprompter/issues/1) — visual polish (current release)
-- [v0.3.0](https://github.com/kori-app/teleprompter/issues/7) — timing intelligence
-- [v0.4.0](https://github.com/kori-app/teleprompter/issues/15) — AI Co-pilot
+- [v0.2.0](https://github.com/datatechsolutionsbr/teleprompter/issues/1) — visual polish (current release)
+- [v0.3.0](https://github.com/datatechsolutionsbr/teleprompter/issues/7) — timing intelligence
+- [v0.4.0](https://github.com/datatechsolutionsbr/teleprompter/issues/15) — AI Co-pilot
 
 ## License
 

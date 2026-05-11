@@ -7,3 +7,7 @@ dist
 # Build outputs from apps/
 apps/*/dist
 apps/*/node_modules
+
+# tsc -b emits sibling .js for every .ts/.tsx in apps/landing/src/ when
+# noEmit is off — these are not source, they're build artefacts.
+apps/*/src/**/*.js
