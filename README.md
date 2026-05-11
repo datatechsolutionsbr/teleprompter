@@ -273,11 +273,12 @@ a real Vite dev server consuming the package via npm link.
 
 ## Contributing
 
-Issues + PRs welcome. The roadmap is public:
+Issues + PRs welcome. The roadmap is public — every milestone lives as
+a GitHub EPIC tagged [`roadmap`](https://github.com/datatechsolutionsbr/teleprompter/issues?q=is%3Aissue+label%3Aroadmap):
 
-- [v0.2.0](https://github.com/datatechsolutionsbr/teleprompter/issues/1) — visual polish (current release)
-- [v0.3.0](https://github.com/datatechsolutionsbr/teleprompter/issues/7) — timing intelligence
-- [v0.4.0](https://github.com/datatechsolutionsbr/teleprompter/issues/15) — AI Co-pilot
+- [v0.3.0](https://github.com/datatechsolutionsbr/teleprompter/issues/7) — timing intelligence (in progress; voice-paced ✅, structured sections + touch gestures still open)
+- [v0.4.0 Whisper backend](https://github.com/datatechsolutionsbr/teleprompter/issues/21) — opt-in client-side Whisper for Firefox/Safari support + multi-language accuracy
+- [v0.4.0 AI Co-pilot](https://github.com/datatechsolutionsbr/teleprompter/issues/15) — write & rewrite scripts via LLM
 
 ## License
 
